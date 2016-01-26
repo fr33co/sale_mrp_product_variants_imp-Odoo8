@@ -30,7 +30,7 @@ class ProcurementOrder(models.Model):
         res = super(ProcurementOrder, self).make_mo()
         production_id = res.values()[0]
         sale_order_id = self.env['mrp.production'].search_read([('id', '=', production_id)], ['sale_order'])
-        sale_order_line_id = self.env['sale.order.line'].search_read([('order_id', '=', sale_order_id[0]['sale_order'][0])], ['id'])
+        sale_order_line_id = self.env['sale.order.line'].search_read([('order_id', '=', sale_order_id[0]['sale_order'][0])], ['id', 'product_cantidad_total'])
         sale_order_line_attr = self.env['sale.order.line.attribute'].search_read([('sale_line', '=', sale_order_line_id[0]['id'])], ['attribute', 'value', 'size_x', 'size_y', 'size_z'])
         for a in sale_order_line_attr:
             attribute = False
@@ -58,4 +58,6 @@ class ProcurementOrder(models.Model):
             mrp_production_attr_id = self.env['mrp.production.attribute'].search_read([('attribute', '=', attribute), ('mrp_production', '=', production_id)], ['id'])
             mrp_production_attr_obj = self.env['mrp.production.attribute'].browse(mrp_production_attr_id[0]['id'])
             mrp_production_attr_obj.write({'size_x': size_x, 'size_y': size_y, 'size_z': size_z,})
+            # mrp_production_obj = self.env['mrp.production'].browse(production_id)
+            # mrp_production_obj.write({'product_qty': sale_order_line_id[0]['product_cantidad_total']})
         return res
