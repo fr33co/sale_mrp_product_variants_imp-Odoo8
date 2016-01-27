@@ -60,5 +60,6 @@ class ProcurementOrder(models.Model):
             mp_qty = 1 * (size_x or 1.0) * (size_y or 1.0) * (size_z)
             mrp_production_attr_obj.write({'size_x': size_x, 'size_y': size_y, 'size_z': size_z, 'mp_qty': mp_qty})
             mrp_production_obj = self.env['mrp.production'].browse(production_id)
+            #Falta realizar el calculo correcto de product_qty, acorde a product_cantidad_total
             mrp_production_obj.write({'product_qty': sale_order_line_id[0]['product_cantidad_total']})
         return res
