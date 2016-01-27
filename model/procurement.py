@@ -32,6 +32,7 @@ class ProcurementOrder(models.Model):
         sale_order_id = self.env['mrp.production'].search_read([('id', '=', production_id)], ['sale_order'])
         sale_order_line_id = self.env['sale.order.line'].search_read([('order_id', '=', sale_order_id[0]['sale_order'][0])], ['id', 'product_cantidad_total'])
         sale_order_line_attr = self.env['sale.order.line.attribute'].search_read([('sale_line', '=', sale_order_line_id[0]['id'])], ['attribute', 'value', 'size_x', 'size_y', 'size_z'])
+        cantidad_total_product = 0.0
         for a in sale_order_line_attr:
             attribute = False
             value = False
@@ -59,7 +60,7 @@ class ProcurementOrder(models.Model):
             mrp_production_attr_obj = self.env['mrp.production.attribute'].browse(mrp_production_attr_id[0]['id'])
             mp_qty = 1 * (size_x or 1.0) * (size_y or 1.0) * (size_z)
             mrp_production_attr_obj.write({'size_x': size_x, 'size_y': size_y, 'size_z': size_z, 'mp_qty': mp_qty})
-            mrp_production_obj = self.env['mrp.production'].browse(production_id)
-            #Falta realizar el calculo correcto de product_qty, acorde a product_cantidad_total
-            mrp_production_obj.write({'product_qty': sale_order_line_id[0]['product_cantidad_total']})
+            cantidad_total_product += mp_qty / 10000
+        mrp_production_obj = self.env['mrp.production'].browse(production_id)
+        mrp_production_obj.write({'product_qty': round(cantidad_total_product, 2)})
         return res
