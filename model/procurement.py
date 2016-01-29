@@ -60,7 +60,8 @@ class ProcurementOrder(models.Model):
             mrp_production_attr_obj = self.env['mrp.production.attribute'].browse(mrp_production_attr_id[0]['id'])
             mp_qty = 1 * (size_x or 1.0) * (size_y or 1.0) * (size_z)
             mrp_production_attr_obj.write({'size_x': size_x, 'size_y': size_y, 'size_z': size_z, 'mp_qty': mp_qty})
-            cantidad_total_product += mp_qty / 10000
+            if size_y > 0:
+                cantidad_total_product += mp_qty / 10000
         mrp_production_obj = self.env['mrp.production'].browse(production_id)
         mrp_production_obj.write({'product_qty': round(cantidad_total_product, 2)})
         return res
