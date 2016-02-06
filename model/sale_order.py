@@ -16,7 +16,26 @@
 #
 ##############################################################################
 
+from openerp import models, fields, api, exceptions, _
+from openerp.addons import decimal_precision as dp
 
-import procurement
-import sale_order
 
+class ProductAttributeValueSaleLine(models.Model):
+	_name = 'sale.order.line.attribute'
+	
+	@api.one
+	@api.depends('value', 'sale_line.product_template', 'mp_qty')
+	def _get_price_extra(self):
+		print '----- Sobreescribiendo _get_price_extra -----'
+		res = super(ProductAttributeValueSaleLine, self)._get_price_extra()
+		return res
+
+
+class SaleOrderLine(models.Model):
+	_inherit = 'sale.order.line'
+	
+	@api.multi
+	def update_price_unit(self):
+		print '----- Sobreescribiendo update_price_unit -----'
+		res = super(SaleOrderLine, self).update_price_unit()
+		return res
