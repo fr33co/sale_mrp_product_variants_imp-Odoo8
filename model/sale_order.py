@@ -20,17 +20,6 @@ from openerp import models, fields, api, exceptions, _
 from openerp.addons import decimal_precision as dp
 
 
-class ProductAttributeValueSaleLine(models.Model):
-	_name = 'sale.order.line.attribute'
-	
-	@api.one
-	@api.depends('value', 'sale_line.product_template', 'mp_qty')
-	def _get_price_extra(self):
-		print '----- Sobreescribiendo _get_price_extra -----'
-		res = super(ProductAttributeValueSaleLine, self)._get_price_extra()
-		return res
-
-
 class SaleOrderLine(models.Model):
 	_inherit = 'sale.order.line'
 	
@@ -39,3 +28,19 @@ class SaleOrderLine(models.Model):
 		print '----- Sobreescribiendo update_price_unit -----'
 		res = super(SaleOrderLine, self).update_price_unit()
 		return res
+
+
+class ProductAttributeValueSaleLine(models.Model):
+    _inherit = 'sale.order.line.attribute'
+
+    @api.one
+    @api.depends('value', 'sale_line.product_template', 'mp_qty')
+    def _get_price_extra(self):
+        print '----- Sobreescribiendo _get_price_extra -----'
+        res = super(ProductAttributeValueSaleLine, self)._get_price_extra()
+        price_extra = 0.0
+        for price in self.value.price_ids:
+            if price.product_tmpl_id.id == self.sale_line.product_template.id:
+                price_extra = self.sale_line.product_template.list_price
+        self.price_extra = price_extra * self.mp_qty
+        return res
