@@ -25,8 +25,14 @@ class SaleOrderLine(models.Model):
 	
 	@api.multi
 	def update_price_unit(self):
-		print '----- Sobreescribiendo update_price_unit -----'
+		""" Sobreescribiendo update_price_unit """
 		res = super(SaleOrderLine, self).update_price_unit()
+		self.ensure_one()
+		if not self.product_id:
+			price_extra = 0.0
+			for attr_line in self.product_attributes:
+				price_extra += attr_line.price_extra                
+			self.price_unit = price_extra
 		return res
 
 
@@ -36,11 +42,9 @@ class ProductAttributeValueSaleLine(models.Model):
     @api.one
     @api.depends('value', 'sale_line.product_template', 'mp_qty')
     def _get_price_extra(self):
-        print '----- Sobreescribiendo _get_price_extra -----'
+        """ Sobreescribiendo _get_price_extra """
         res = super(ProductAttributeValueSaleLine, self)._get_price_extra()
-        price_extra = 0.0
         for price in self.value.price_ids:
             if price.product_tmpl_id.id == self.sale_line.product_template.id:
                 price_extra = self.sale_line.product_template.list_price
-        self.price_extra = price_extra * self.mp_qty
         return res
