@@ -17,6 +17,5 @@
 ##############################################################################
 
 
-import procurement
 import sale_order
-
+import procurement
