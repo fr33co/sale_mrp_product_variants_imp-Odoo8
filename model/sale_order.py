@@ -27,15 +27,26 @@ class SaleOrderLine(models.Model):
 	def update_price_unit(self):
 		""" Sobreescribiendo update_price_unit """
 		res = super(SaleOrderLine, self).update_price_unit()
-		self.ensure_one()
 		if not self.product_id:
 			price_extra = 0.0
 			for attr_line in self.product_attributes:
 				price_extra += attr_line.price_extra                
 			self.price_unit = price_extra
 		return res
+	
+	@api.multi
+	def update_uom_qty(self):
+		""" Sobreescribiendo update_uom_qty """
+		res = super(SaleOrderLine, self).update_uom_qty()
+		self.ensure_one()
+		if not self.product_id:
+			self.product_cantidad_total = 0.0
+			for attr_line in self.product_attributes:
+				if attr_line.size_y > 0:
+					self.product_cantidad_total += attr_line.mp_qty
+		return res
 
-
+					
 class ProductAttributeValueSaleLine(models.Model):
     _inherit = 'sale.order.line.attribute'
 
@@ -44,7 +55,5 @@ class ProductAttributeValueSaleLine(models.Model):
     def _get_price_extra(self):
         """ Sobreescribiendo _get_price_extra """
         res = super(ProductAttributeValueSaleLine, self)._get_price_extra()
-        for price in self.value.price_ids:
-            if price.product_tmpl_id.id == self.sale_line.product_template.id:
-                price_extra = self.sale_line.product_template.list_price
+        price_extra = self.sale_line.product_template.list_price
         return res

@@ -28,6 +28,7 @@ class ProcurementOrder(models.Model):
     def make_mo(self):
         print '----- Sobreescribiendo make_mo -----'
         res = super(ProcurementOrder, self).make_mo()
+        mp_qty = 1
         production_id = res.values()[0]
         sale_order_id = self.env['mrp.production'].search_read([('id', '=', production_id)], ['sale_order'])
         sale_order_line_id = self.env['sale.order.line'].search_read([('order_id', '=', sale_order_id[0]['sale_order'][0])], ['id', 'product_cantidad_total'])
@@ -61,7 +62,7 @@ class ProcurementOrder(models.Model):
             mp_qty = 1 * (size_x or 1.0) * (size_y or 1.0) * (size_z)
             mrp_production_attr_obj.write({'size_x': size_x, 'size_y': size_y, 'size_z': size_z, 'mp_qty': mp_qty})
             if size_y > 0:
-                cantidad_total_product += mp_qty / 10000
+                cantidad_total_product += mp_qty 
         mrp_production_obj = self.env['mrp.production'].browse(production_id)
         mrp_production_obj.write({'product_qty': round(cantidad_total_product, 2)})
         return res
