@@ -31,7 +31,11 @@ class ProcurementOrder(models.Model):
         mp_qty = 1
         production_id = res.values()[0]
         sale_order_id = self.env['mrp.production'].search_read([('id', '=', production_id)], ['sale_order'])
-        sale_order_line_id = self.env['sale.order.line'].search_read([('order_id', '=', sale_order_id[0]['sale_order'][0])], ['id', 'product_cantidad_total'])
+        sale_order_line_id = None
+        if len(sale_order_id[0]['sale_order'][0]) > 1:
+			sale_order_line_id = self.env['sale.order.line'].search_read([('order_id', 'in', sale_order_id[0]['sale_order'][0])], ['id', 'product_cantidad_total'])
+		else:
+			sale_order_line_id = self.env['sale.order.line'].search_read([('order_id', '=', sale_order_id[0]['sale_order'][0])], ['id', 'product_cantidad_total'])
         sale_order_line_attr = self.env['sale.order.line.attribute'].search_read([('sale_line', '=', sale_order_line_id[0]['id'])], ['attribute', 'value', 'size_x', 'size_y', 'size_z'])
         cantidad_total_product = 0.0
         for a in sale_order_line_attr:
