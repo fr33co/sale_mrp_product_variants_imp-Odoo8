@@ -26,16 +26,11 @@ class ProcurementOrder(models.Model):
 
     @api.multi
     def make_mo(self):
-        print '----- Sobreescribiendo make_mo -----'
         res = super(ProcurementOrder, self).make_mo()
         mp_qty = 1
         production_id = res.values()[0]
         sale_order_id = self.env['mrp.production'].search_read([('id', '=', production_id)], ['sale_order'])
-        sale_order_line_id = None
-        if len(sale_order_id[0]['sale_order'][0]) > 1:
-			sale_order_line_id = self.env['sale.order.line'].search_read([('order_id', 'in', sale_order_id[0]['sale_order'][0])], ['id', 'product_cantidad_total'])
-		else:
-			sale_order_line_id = self.env['sale.order.line'].search_read([('order_id', '=', sale_order_id[0]['sale_order'][0])], ['id', 'product_cantidad_total'])
+        sale_order_line_id = self.env['sale.order.line'].search_read([('order_id', '=', sale_order_id[0]['sale_order'][0])], ['id', 'product_cantidad_total'])
         sale_order_line_attr = self.env['sale.order.line.attribute'].search_read([('sale_line', '=', sale_order_line_id[0]['id'])], ['attribute', 'value', 'size_x', 'size_y', 'size_z'])
         cantidad_total_product = 0.0
         for a in sale_order_line_attr:
@@ -66,7 +61,7 @@ class ProcurementOrder(models.Model):
             mp_qty = 1 * (size_x or 1.0) * (size_y or 1.0) * (size_z)
             mrp_production_attr_obj.write({'size_x': size_x, 'size_y': size_y, 'size_z': size_z, 'mp_qty': mp_qty})
             if size_y > 0:
-                cantidad_total_product += mp_qty 
+                cantidad_total_product += mp_qty
         mrp_production_obj = self.env['mrp.production'].browse(production_id)
         mrp_production_obj.write({'product_qty': round(cantidad_total_product, 2)})
         return res
